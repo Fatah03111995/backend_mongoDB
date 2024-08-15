@@ -2,6 +2,16 @@ import mongoose from 'mongoose';
 
 const UserSchema = mongoose.Schema(
   {
+    firstName: {
+      type: String,
+      required: true,
+      max: 10,
+    },
+    lastName: {
+      type: String,
+      default: '',
+      max: 30,
+    },
     userName: {
       type: String,
       required: true,
@@ -21,6 +31,7 @@ const UserSchema = mongoose.Schema(
       type: String,
       default: '',
     },
+
     photoProfilePath: {
       type: String,
       default: '',

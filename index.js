@@ -5,8 +5,9 @@ import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import multer from 'multer';
+import authRoutes from './routes/authRoutes.js';
 
-//---------configuration
+//---------CONFIGURATION
 dotenv.config();
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(express.urlencoded({ limit: '30mb', extended: true }));
 app.use(cors());
 
 //---------CONNECTING TO DATABASE
+app.use('/auth', authRoutes);
+
 mongoose
   .connect(process.env.MONGO_URL)
   .then(
