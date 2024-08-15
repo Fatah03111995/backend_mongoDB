@@ -14,9 +14,10 @@ class Auth {
         lastName,
         photoProfilePath,
       } = req.body;
+      console.log(req.body);
 
-      const salt = bcrypt.genSalt();
-      const passwordHash = bcrypt.hash(password, salt);
+      const salt = await bcrypt.genSalt();
+      const passwordHash = await bcrypt.hash(password, salt);
 
       const newUser = UserModel({
         firstName,

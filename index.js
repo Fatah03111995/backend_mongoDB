@@ -20,6 +20,10 @@ app.use(cors());
 //---------CONNECTING TO DATABASE
 app.use('/auth', authRoutes);
 
+app.use((req, res) => {
+  res.status(404).json({ message: 'page-not-found' });
+});
+
 mongoose
   .connect(process.env.MONGO_URL)
   .then(
