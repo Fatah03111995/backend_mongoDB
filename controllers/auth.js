@@ -14,7 +14,6 @@ class Auth {
         lastName,
         photoProfilePath,
       } = req.body;
-      console.log(req.body);
 
       const salt = await bcrypt.genSalt();
       const passwordHash = await bcrypt.hash(password, salt);
@@ -29,6 +28,11 @@ class Auth {
         photoProfilePath,
       });
 
+      const isExist = await UserModel.findOne({ email });
+      if (isExist) {
+        res.status(400).json({ message: 'email-already-used' });
+        return;
+      }
       const savedUser = await newUser.save();
       res.status(200).json(savedUser);
     } catch (e) {
@@ -42,10 +46,12 @@ class Auth {
       const user = await UserModel.findOne({ email: email });
       if (!user) {
         res.status(400).json({ message: "user-doesn't exist" });
+        return;
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         res.status(403).json({ message: 'invalid-credential' });
+        return;
       }
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_PASS);
