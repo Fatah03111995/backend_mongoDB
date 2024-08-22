@@ -7,6 +7,8 @@ import morgan from 'morgan';
 import multer from 'multer';
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import fs from 'fs';
+import Auth from './controllers/auth.js';
 
 //---------CONFIGURATION
 dotenv.config();
@@ -19,10 +21,34 @@ app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ limit: '30mb', extended: true }));
 app.use(cors());
 
-//---------CONNECTING TO DATABASE
+//------------STORAGE
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const userName = req.body.userName;
+    const path = `public/assets/${userName}`;
+
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true });
+    }
+
+    cb(null, path);
+  },
+
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+//--------- ROUTING WITH FILE
+app.post('/auth/register', upload.single('picture'), Auth.register);
+
+//-------------ROUTING
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
 
+//---------CONNECTING TO DATABASE
 app.use((req, res) => {
   res.status(404).json({ message: 'page-not-found' });
 });

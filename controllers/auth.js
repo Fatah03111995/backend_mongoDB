@@ -5,15 +5,10 @@ import UserModel from '../models/UserModel.js';
 class Auth {
   static async register(req, res) {
     try {
-      const {
-        userName,
-        email,
-        password,
-        fcmToken,
-        firstName,
-        lastName,
-        photoProfilePath,
-      } = req.body;
+      const { userName, email, password, fcmToken, firstName, lastName } =
+        req.body;
+
+      const { path } = req.file;
 
       const salt = await bcrypt.genSalt();
       const passwordHash = await bcrypt.hash(password, salt);
@@ -25,17 +20,23 @@ class Auth {
         email,
         password: passwordHash,
         fcmToken,
-        photoProfilePath,
+        photoProfilePath: path,
       });
 
-      const isExist = await UserModel.findOne({ email });
-      if (isExist) {
+      const isEmailExist = await UserModel.findOne({ email });
+      if (isEmailExist) {
         res.status(400).json({ message: 'email-already-used' });
+        return;
+      }
+      const isUserNameExist = await UserModel.findOne({ userName });
+      if (isUserNameExist) {
+        res.status(400).json({ message: 'username-already-used' });
         return;
       }
       const savedUser = await newUser.save();
       res.status(200).json(savedUser);
     } catch (e) {
+      console.log(e);
       res.status(500).json({ error: e.message });
     }
   }
@@ -45,7 +46,7 @@ class Auth {
       const { email, password } = req.body;
       const user = await UserModel.findOne({ email: email });
       if (!user) {
-        res.status(400).json({ message: "user-doesn't exist" });
+        res.status(400).json({ message: "user-doesn't-exist" });
         return;
       }
       const isMatch = await bcrypt.compare(password, user.password);
