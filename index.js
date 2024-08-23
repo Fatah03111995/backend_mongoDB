@@ -9,6 +9,11 @@ import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import fs from 'fs';
 import Auth from './controllers/auth.js';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename).replaceAll('\\', '/');
 
 //---------CONFIGURATION
 dotenv.config();
@@ -25,7 +30,7 @@ app.use(cors());
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userName = req.body.userName;
-    const path = `public/assets/${userName}`;
+    const path = `${__dirname}/public/assets/${userName}`;
 
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
