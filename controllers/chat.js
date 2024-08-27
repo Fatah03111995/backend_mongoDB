@@ -1,4 +1,5 @@
 import ChatModel from '../models/ChatModel.js';
+import { io } from '../server/server.js';
 
 class Chat {
   static async sendChat(req, res) {
@@ -12,6 +13,9 @@ class Chat {
       });
 
       await newChat.save();
+
+      io.emit('newChat', newChat);
+
       res.status(200).json({ message: 'has-sended' });
     } catch (e) {
       res.status(500).json({ error: e.message });

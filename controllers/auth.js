@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import UserModel from '../models/UserModel.js';
+import ChatModel from '../models/ChatModel.js';
+import { io } from '../server/server.js';
 
 class Auth {
   static async register(req, res) {
@@ -34,6 +36,7 @@ class Auth {
         return;
       }
       const savedUser = await newUser.save();
+      console.log(savedUser);
       res.status(200).json(savedUser);
     } catch (e) {
       console.log(e);
