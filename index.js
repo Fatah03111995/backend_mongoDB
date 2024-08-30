@@ -9,15 +9,16 @@ import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import fs from 'fs';
 import Auth from './controllers/auth.js';
-import path, { dirname } from 'path';
+import path from 'path';
 import { fileURLToPath } from 'url';
+
+import { app, httpServer, io } from './server/server.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename).replaceAll('\\', '/');
 
 //---------CONFIGURATION
 dotenv.config();
-const app = express();
 
 app.use(helmet());
 app.use(morgan('common'));
@@ -30,7 +31,7 @@ app.use(cors());
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userName = req.body.userName;
-    const path = `${__dirname}/public/assets/${userName}`;
+    const path = `${process.env.MONGO_URL}/public/assets/${userName}`;
 
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
@@ -58,11 +59,10 @@ app.use((req, res) => {
   res.status(404).json({ message: 'page-not-found' });
 });
 
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(
-    app.listen(process.env.PORT_BACKEND, () =>
-      console.log(`LISTENING MONGO DB FROM PORT : ${process.env.PORT_BACKEND}`)
-    )
-  )
-  .catch((e) => console.log(`ERROR : ${e}`));
+mongoose.connect(process.env.MONGO_URL);
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB Connection Error'));
+db.once('open', () => console.log('Connected to MongoDB'));
+
+httpServer.listen(process.env.PORT_BACKEND);

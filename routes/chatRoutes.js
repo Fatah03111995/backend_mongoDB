@@ -3,6 +3,6 @@ import Chat from '../controllers/chat.js';
 
 const chatRoutes = Router();
 chatRoutes.post('/', Chat.sendChat);
-chatRoutes.get('/:userId/:toId', Chat.getUserChatToSpesific);
+chatRoutes.get('/:userEmail/', Chat.getUserChat);
 
 export default chatRoutes;

@@ -18,17 +18,16 @@ io.on('connection', (socket) => {
   console.log(`User connected with socketID: ${socket.id}`);
   const userId = socket.handshake.query.userId;
 
+  if (userId != 'undefined') {
+    userSocket[userId] = socket.id;
+  }
+  console.log(userSocket);
   io.emit('getOnlineUsers', Object.keys(userSocket));
 
   //-------------ON SEND MESSAGE
   socket.on('sendChat', async (payload) => {
     console.log({ payload });
-
     socket.broadcast.emit('newChat', payload);
-  });
-
-  socket.on('joinRoom', (userId) => {
-    socket.join(userId);
   });
 
   //---------ON DISCONNECT

@@ -1,5 +1,5 @@
 import ChatModel from '../models/ChatModel.js';
-import { io } from '../server/server.js';
+import { getReceiverSocket, io } from '../server/server.js';
 
 class Chat {
   static async sendChat(req, res) {
@@ -13,29 +13,62 @@ class Chat {
       });
 
       await newChat.save();
+      console.log(newChat);
+      const receiverSocketId = getReceiverSocket(to);
 
-      io.emit('newChat', newChat);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('newChat', newChat);
+      }
 
-      res.status(200).json({ message: 'has-sended' });
+      res.status(200).json({ newChat });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
   }
 
-  static async getUserChatToSpesific(req, res) {
+  static async getUserChat(req, res) {
     try {
-      const { userId, toId } = req.params;
-      const chatFromUser = await ChatModel.find({ from: userId })
-        .find({ to: toId })
-        .exec();
-      const chatFromTo = await ChatModel.find({ from: toId })
-        .find({ to: userId })
-        .exec();
-      const chats = [...chatFromUser, ...chatFromTo] ?? [];
-      if (chats.length == 0) {
-        res.status(404).json({ message: 'chat-not-found' });
-        return;
-      }
+      const { userEmail } = req.params;
+      const chats = await ChatModel.aggregate([
+        {
+          $match: {
+            $or: [
+              {
+                from: userEmail,
+              },
+              {
+                to: userEmail,
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'to',
+            foreignField: 'email',
+            as: 'receiverDetails',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'from',
+            foreignField: 'email',
+            as: 'senderDetails',
+          },
+        },
+        {
+          $unwind: '$senderDetails',
+        },
+        {
+          $unwind: '$receiverDetails',
+        },
+      ]);
+      console.log(chats);
+      // const chats = await ChatModel.find({
+      //   $or: [{ from: userId }, { to: userId }],
+      // }).exec();
       res.status(200).json(chats);
     } catch (e) {
       res.status(500).json({ error: e.message });
