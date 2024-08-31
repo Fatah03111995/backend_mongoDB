@@ -53,6 +53,7 @@ app.post('/auth/register', upload.single('picture'), Auth.register);
 //-------------ROUTING
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
+app.use('/public', express.static(path.join(__dirname, '/public')));
 
 //---------CONNECTING TO DATABASE
 app.use((req, res) => {
