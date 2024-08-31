@@ -6,14 +6,43 @@ class Chat {
     try {
       const { from, to, message } = req.body;
 
-      const newChat = ChatModel({
+      const newRawData = ChatModel({
         from,
         to,
         message,
       });
 
-      await newChat.save();
-      console.log(newChat);
+      await newRawData.save();
+      const newChat = await ChatModel.aggregate([
+        {
+          $match: {
+            _id: newRawData._id,
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'from',
+            foreignField: 'email',
+            as: 'senderDetails',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'to',
+            foreignField: 'email',
+            as: 'receiverDetails',
+          },
+        },
+        {
+          $unwind: '$senderDetails',
+        },
+        {
+          $unwind: '$receiverDetails',
+        },
+      ]);
+
       const receiverSocketId = getReceiverSocket(to);
 
       if (receiverSocketId) {
@@ -65,10 +94,6 @@ class Chat {
           $unwind: '$receiverDetails',
         },
       ]);
-      console.log(chats);
-      // const chats = await ChatModel.find({
-      //   $or: [{ from: userId }, { to: userId }],
-      // }).exec();
       res.status(200).json(chats);
     } catch (e) {
       res.status(500).json({ error: e.message });
