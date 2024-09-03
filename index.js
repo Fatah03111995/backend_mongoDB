@@ -13,9 +13,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { app, httpServer, io } from './server/server.js';
+import userRoutes from './routes/userRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename).replaceAll('\\', '/');
+const __dirname = path.dirname(__filename);
 
 //---------CONFIGURATION
 dotenv.config();
@@ -31,13 +32,15 @@ app.use(cors());
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userName = req.body.userName;
-    const path = `${process.env.MONGO_URL}/public/assets/${userName}`;
 
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path, { recursive: true });
+    const pathImg = path.join(__dirname, `public/assets/${userName}`);
+    console.log(pathImg);
+
+    if (!fs.existsSync(pathImg)) {
+      fs.mkdirSync(pathImg, { recursive: true });
     }
 
-    cb(null, path);
+    cb(null, pathImg);
   },
 
   filename: (req, file, cb) => {
@@ -51,6 +54,7 @@ const upload = multer({ storage });
 app.post('/auth/register', upload.single('picture'), Auth.register);
 
 //-------------ROUTING
+app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
 app.use('/public', express.static(path.join(__dirname, '/public')));

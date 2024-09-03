@@ -8,20 +8,18 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new socketIO(httpServer);
 
-const getReceiverSocket = (receiverId) => {
-  return userSocket[receiverId];
+const getReceiverSocket = (receiverEmail) => {
+  return userSocket[receiverEmail];
 };
 
 const userSocket = {};
 
 io.on('connection', (socket) => {
   console.log(`User connected with socketID: ${socket.id}`);
-  const userId = socket.handshake.query.userId;
-
-  if (userId != 'undefined') {
-    userSocket[userId] = socket.id;
+  const userEmail = socket.handshake.query.userEmail;
+  if (userEmail != 'undefined') {
+    userSocket[userEmail] = socket.id;
   }
-  console.log(userSocket);
   io.emit('getOnlineUsers', Object.keys(userSocket));
 
   //-------------ON SEND MESSAGE
@@ -33,7 +31,7 @@ io.on('connection', (socket) => {
   //---------ON DISCONNECT
   socket.on('disconnect', () => {
     console.log(`User disconnected with socketID: ${socket.id}`);
-    delete userSocket[userId];
+    delete userSocket[userEmail];
     io.emit('getOnlineUsers', Object.keys(userSocket));
   });
 });

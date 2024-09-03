@@ -43,13 +43,12 @@ class Chat {
         },
       ]);
 
-      const receiverSocketId = getReceiverSocket(to);
-
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit('newChat', newChat);
+      const receiverSocketEmail = getReceiverSocket(to);
+      if (receiverSocketEmail) {
+        io.to(receiverSocketEmail).emit('newChat', newChat[0]);
       }
 
-      res.status(200).json({ newChat });
+      res.status(200).json(newChat[0]);
     } catch (e) {
       res.status(500).json({ error: e.message });
     }

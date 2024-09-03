@@ -15,6 +15,8 @@ class Auth {
       const salt = await bcrypt.genSalt();
       const passwordHash = await bcrypt.hash(password, salt);
 
+      const urlPath = path.replace(/\\/g, '/').split('backend_mongoDB/')[1];
+
       const newUser = UserModel({
         firstName,
         lastName,
@@ -22,7 +24,7 @@ class Auth {
         email,
         password: passwordHash,
         fcmToken,
-        photoProfilePath: path,
+        photoProfilePath: urlPath,
       });
 
       const isEmailExist = await UserModel.findOne({ email });
@@ -36,7 +38,6 @@ class Auth {
         return;
       }
       const savedUser = await newUser.save();
-      console.log(savedUser);
       res.status(200).json(savedUser);
     } catch (e) {
       console.log(e);
