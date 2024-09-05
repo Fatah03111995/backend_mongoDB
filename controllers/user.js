@@ -24,7 +24,6 @@ class UserController {
       if (!findedUsers) {
         res.status(400).json({ message: 'not-found' });
       }
-      console.log(findedUsers);
       res.status(200).json(findedUsers);
     } catch (e) {
       res.status(500).json({ error: e.message });

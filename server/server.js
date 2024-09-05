@@ -20,6 +20,7 @@ io.on('connection', (socket) => {
   if (userEmail != 'undefined') {
     userSocket[userEmail] = socket.id;
   }
+  console.log(userSocket);
   io.emit('getOnlineUsers', Object.keys(userSocket));
 
   //-------------ON SEND MESSAGE

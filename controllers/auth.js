@@ -40,7 +40,6 @@ class Auth {
       const savedUser = await newUser.save();
       res.status(200).json(savedUser);
     } catch (e) {
-      console.log(e);
       res.status(500).json({ error: e.message });
     }
   }

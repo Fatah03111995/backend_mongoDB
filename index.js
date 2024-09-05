@@ -34,7 +34,6 @@ const storage = multer.diskStorage({
     const userName = req.body.userName;
 
     const pathImg = path.join(__dirname, `public/assets/${userName}`);
-    console.log(pathImg);
 
     if (!fs.existsSync(pathImg)) {
       fs.mkdirSync(pathImg, { recursive: true });
